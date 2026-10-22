@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Piano Coach</title>
+<meta name="description" content="Learn songs by ear and by memory — falling notes, phrases, wait mode with your digital piano.">
+<meta name="theme-color" content="#121418">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Piano Coach">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <button id="songBtn" class="song-btn" aria-haspopup="dialog" aria-controls="library">
+      <span class="eyebrow">Song</span>
+      <span class="song-row"><span id="songName">Loading…</span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></span>
+    </button>
+    <div class="top-right">
+      <button id="midiChip" class="chip" data-state="off"><span class="dot" aria-hidden="true"></span><span id="midiText">Connect piano</span></button>
+      <button id="settingsBtn" class="icon-btn" aria-label="Settings" aria-haspopup="dialog" aria-controls="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.7 7.7 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.7 7.7 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="phrases" aria-label="Phrases">
+    <button id="prevPh" class="icon-btn" aria-label="Previous phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></button>
+    <div id="phraseList" class="phrase-list" role="group" aria-label="Pick a phrase"></div>
+    <button id="nextPh" class="icon-btn" aria-label="Next phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z"/></svg></button>
+    <div class="toggles">
+      <button id="chainT" class="toggle" aria-pressed="false" title="Start from the phrase before, to practise the join">Chain</button>
+      <button id="loopT" class="toggle" aria-pressed="true">Loop</button>
+    </div>
+  </nav>
+
+  <main id="stage" class="stage">
+    <canvas id="cv" aria-label="Falling notes and piano keyboard" role="img"></canvas>
+    <section id="card" class="card" aria-live="polite">
+      <p class="eyebrow" id="cardEyebrow"></p>
+      <h2 id="cardTitle"></h2>
+      <p id="cardBody"></p>
+      <p id="cardMeta" class="meta"></p>
+      <div class="card-actions" id="cardActions"></div>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <footer class="controls">
+    <div class="group">
+      <span class="glabel" id="lHands">Hands</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lHands" data-pref="hands">
+        <button role="radio" data-v="R">Right</button><button role="radio" data-v="both">Both</button><button role="radio" data-v="L">Left</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="glabel" id="lMode">Mode</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lMode" data-pref="mode">
+        <button role="radio" data-v="watch">Watch</button><button role="radio" data-v="wait">Wait</button><button role="radio" data-v="play">Play</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="glabel" id="lSpeed">Speed</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lSpeed" data-pref="speed" id="speedSeg">
+        <button role="radio" data-v="0.5">50%</button><button role="radio" data-v="0.7">70%</button><button role="radio" data-v="0.85">85%</button><button role="radio" data-v="1">100%</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="glabel" id="lGuide">Notes</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lGuide" data-pref="guide">
+        <button role="radio" data-v="full">Show</button><button role="radio" data-v="fade">Fade</button><button role="radio" data-v="memory">Memory</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="restartBtn" class="icon-btn big" aria-label="Restart phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+      <button id="startBtn" class="primary">Start</button>
+    </div>
+  </footer>
+</div>
+
+<dialog id="library" aria-labelledby="libTitle">
+  <div class="sheet">
+    <header class="sheet-head"><h2 id="libTitle">Songs</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></header>
+    <ul id="songList" class="song-list"></ul>
+    <label class="primary file-btn">Add a MIDI file<input id="fileIn" type="file" accept=".mid,.midi,audio/midi,audio/x-midi" hidden></label>
+    <p class="help">Get the song's MIDI file (for example from the tutorial creator's Patreon), save it to this tablet, then add it here. Songs stay on this device.</p>
+  </div>
+</dialog>
+
+<dialog id="settings" aria-labelledby="setTitle">
+  <div class="sheet">
+    <header class="sheet-head"><h2 id="setTitle">Settings</h2><button class="icon-btn close" data-close aria-label="Close">✕</button></header>
+    <div class="set">
+      <span class="glabel" id="sLh">Left hand</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="sLh" data-pref="lh">
+        <button role="radio" data-v="roots">Root notes</button><button role="radio" data-v="chords">Simple chords</button><button role="radio" data-v="written">As written</button>
+      </div>
+      <p class="help" id="lhHelp"></p>
+    </div>
+    <div class="set">
+      <span class="glabel" id="sRh">Right hand</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="sRh" data-pref="rh">
+        <button role="radio" data-v="top">Melody only</button><button role="radio" data-v="written">As written</button>
+      </div>
+    </div>
+    <div class="set">
+      <span class="glabel" id="sPh">Phrase length</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="sPh" data-pref="phraseBars">
+        <button role="radio" data-v="2">2 bars</button><button role="radio" data-v="4">4 bars</button><button role="radio" data-v="8">8 bars</button>
+      </div>
+    </div>
+    <div class="set">
+      <span class="glabel" id="sOther">The hand you're not practising</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="sOther" data-pref="otherHand">
+        <button role="radio" data-v="true">Plays along</button><button role="radio" data-v="false">Silent</button>
+      </div>
+    </div>
+    <div class="set">
+      <span class="glabel" id="sSound">App sound comes from</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="sSound" data-pref="sound">
+        <button role="radio" data-v="piano">The piano (USB)</button><button role="radio" data-v="tablet">The tablet</button>
+      </div>
+    </div>
+    <div class="set">
+      <button id="resetBtn" class="ghost">Reset progress for this song</button>
+    </div>
+  </div>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
