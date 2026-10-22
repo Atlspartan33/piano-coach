@@ -4,6 +4,8 @@ Learn a song by memory without reading music. Load a MIDI file and the app turns
 
 Built for Terrell's Casio Privia PX-760 and an Android tablet on the music stand.
 
+**Live:** https://atlspartan33.github.io/piano-coach/ (GitHub Pages, from `main`)
+
 ## Run locally
 
 ```bash
